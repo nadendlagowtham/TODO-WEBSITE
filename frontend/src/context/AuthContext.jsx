@@ -4,36 +4,46 @@ import authService from '../services/authService';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // Initialize Auth state from storage
-  useEffect(() => {
-    const initializeAuth = async () => {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  // Initialize user from storage synchronously to avoid loading spinner
+  const getStoredUser = () => {
+    try {
       const storedUser = localStorage.getItem('user') || sessionStorage.getItem('user');
-
-      if (token && storedUser) {
-        try {
-          setUser(JSON.parse(storedUser));
-          // Refresh user profile from server to verify token validity
-          const profile = await authService.getProfile();
-          setUser(profile);
-          // Sync stored user in case it changed
-          if (localStorage.getItem('token')) {
-            localStorage.setItem('user', JSON.stringify(profile));
-          } else {
-            sessionStorage.setItem('user', JSON.stringify(profile));
-          }
-        } catch (error) {
-          console.error('Session verification failed, logging out...', error);
-          logout();
-        }
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (storedUser && token) {
+        return JSON.parse(storedUser);
       }
-      setLoading(false);
+    } catch {
+      // Corrupted data, ignore
+    }
+    return null;
+  };
+
+  const [user, setUser] = useState(getStoredUser);
+  const [loading, setLoading] = useState(false);
+
+  // Background token verification — does NOT block the UI
+  useEffect(() => {
+    const verifyTokenInBackground = async () => {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+
+      if (!token || !user) return;
+
+      try {
+        const profile = await authService.getProfile();
+        setUser(profile);
+        // Sync stored user in case it changed
+        if (localStorage.getItem('token')) {
+          localStorage.setItem('user', JSON.stringify(profile));
+        } else {
+          sessionStorage.setItem('user', JSON.stringify(profile));
+        }
+      } catch (error) {
+        console.error('Session verification failed, logging out...', error);
+        logout();
+      }
     };
 
-    initializeAuth();
+    verifyTokenInBackground();
   }, []);
 
   const login = async (email, password, rememberMe) => {
