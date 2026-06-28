@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #fcf8ff; /* brand-bg */
+    color: #1b1b24; /* brand-text */
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-geist {
+    font-family: 'Geist', sans-serif;
+  }
+}
+
+/* Premium Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #dcd8e5; /* surface-dim */
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #c7c4d8; /* outline-variant */
+}
+
+/* Micro animations and custom classes */
+.blur-header {
+  backdrop-filter: blur(12px);
+  background-color: rgba(252, 248, 255, 0.8);
+}
+
+.hairline-border {
+  border: 1px solid #e5e7eb;
+}
+
+/* Smooth input transitions */
+input, select, textarea, button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom checkbox animation */
+.custom-checkbox:checked + .custom-checkbox-indicator {
+  background-color: #3525cd;
+  border-color: #3525cd;
+}
